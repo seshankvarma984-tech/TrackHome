@@ -113,9 +113,9 @@ class _MainPhoneScreenState extends State<MainPhoneScreen> {
       const SizedBox(height: 10),
 
       Text(
-        isSharing
-            ? "🟢 Live Tracking Enabled"
-            : "🔴 Live Tracking Disabled",
+        trackedDevice?.sharing == true
+    ? "Live Tracking Enabled"
+    : "Live Tracking Disabled",
         style: const TextStyle(
           color: Colors.white,
           fontSize: 24,
@@ -132,10 +132,10 @@ class _MainPhoneScreenState extends State<MainPhoneScreen> {
             radius: 30,
             backgroundColor: Colors.white,
             child: Icon(
-              isSharing
+              trackedDevice?.sharing == true
                   ? Icons.location_on
                   : Icons.location_off,
-              color: isSharing
+              color: trackedDevice?.sharing == true
                   ? Colors.green
                   : Colors.red,
               size: 34,
@@ -151,9 +151,9 @@ class _MainPhoneScreenState extends State<MainPhoneScreen> {
               children: [
 
                 Text(
-                  isSharing
-                      ? "Sharing Location"
-                      : "Location Hidden",
+                  trackedDevice?.sharing == true
+    ? "Location Visible"
+    : "Location Hidden",
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 19,
@@ -164,7 +164,7 @@ class _MainPhoneScreenState extends State<MainPhoneScreen> {
                 const SizedBox(height: 5),
 
                 Text(
-                  "Battery : $batteryLevel %",
+                  "Battery : ${trackedDevice?.battery ?? 0}%",
                   style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 15,
@@ -197,7 +197,7 @@ InfoCard(
 InfoCard(
   icon: Icons.battery_full,
   title: "Battery",
-  subtitle: "$batteryLevel %",
+  subtitle: "${trackedDevice?.battery ?? 0}%",
 ),
 
 const SizedBox(height: 30),
