@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/device_model.dart';
 import '../services/location_service.dart';
 import '../widgets/info_card.dart';
+import 'map_screen.dart';
 
 class MainPhoneScreen extends StatefulWidget {
   const MainPhoneScreen({super.key});
@@ -243,6 +244,36 @@ SizedBox(
   ),
 ),
 
+SizedBox(
+  width: double.infinity,
+  height: 55,
+  child: ElevatedButton.icon(
+    icon: const Icon(Icons.map, color: Colors.white),
+    label: const Text(
+      "OPEN LIVE MAP",
+      style: TextStyle(
+        color: Colors.white,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Colors.blue,
+    ),
+    onPressed: () {
+      if (trackedDevice == null) return;
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => MapScreen(
+            latitude: trackedDevice!.latitude,
+            longitude: trackedDevice!.longitude,
+          ),
+        ),
+      );
+    },
+  ),
+),
 const SizedBox(height: 20),
             ],
           ),
