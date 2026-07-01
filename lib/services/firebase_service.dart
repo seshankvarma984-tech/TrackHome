@@ -36,4 +36,17 @@ class FirebaseService {
       );
     });
   }
+  Stream<List<DeviceModel>> listenToDevices() {
+  return _firestore
+      .collection("tracked_devices")
+      .snapshots()
+      .map((snapshot) {
+    return snapshot.docs.map((doc) {
+      return DeviceModel.fromFirestore(
+        doc.id,
+        doc.data(),
+      );
+    }).toList();
+  });
+}
   }

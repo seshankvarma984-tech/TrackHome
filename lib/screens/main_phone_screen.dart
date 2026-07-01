@@ -17,16 +17,20 @@ class _MainPhoneScreenState extends State<MainPhoneScreen> {
   final FirebaseService _firebaseService = FirebaseService();
   int batteryLevel = 0;
 
-  DeviceModel? trackedDevice;
+ List<DeviceModel> trackeddevices = [];
+ DeviceModel? get firstDevice =>
+    trackeddevices.isNotEmpty ? trackeddevices.first : null;
 
   @override
   void initState() {
     super.initState();
-    _firebaseService.listenToDevice("tracked_phone_001").listen((device) {
-      setState(() {
-        trackedDevice = device;
-      });
-    });
+    _firebaseService
+    .listenToDevices()
+    .listen((devices) {
+  setState(() {
+    trackeddevices = devices;
+  });
+});
     loadBattery();
   }
 
@@ -83,7 +87,7 @@ class _MainPhoneScreenState extends State<MainPhoneScreen> {
                     const SizedBox(height: 10),
 
                     Text(
-                      trackedDevice?.sharing == true
+                      firstDevice?.sharing == true
                           ? "Live Tracking Enabled"
                           : "Live Tracking Disabled",
                       style: const TextStyle(
@@ -101,10 +105,10 @@ class _MainPhoneScreenState extends State<MainPhoneScreen> {
                           radius: 30,
                           backgroundColor: Colors.white,
                           child: Icon(
-                            trackedDevice?.sharing == true
+                            firstDevice?.sharing == true
                                 ? Icons.location_on
                                 : Icons.location_off,
-                            color: trackedDevice?.sharing == true
+                            color: firstDevice?.sharing == true
                                 ? Colors.green
                                 : Colors.red,
                             size: 34,
@@ -118,7 +122,7 @@ class _MainPhoneScreenState extends State<MainPhoneScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                trackedDevice?.sharing == true
+                                firstDevice?.sharing == true
                                     ? "Location Visible"
                                     : "Location Hidden",
                                 style: const TextStyle(
@@ -131,7 +135,7 @@ class _MainPhoneScreenState extends State<MainPhoneScreen> {
                               const SizedBox(height: 5),
 
                               Text(
-                                "Battery : ${trackedDevice?.battery ?? 0}%",
+                                "Battery : ${firstDevice?.battery ?? 0}%",
                                 style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 15,
@@ -159,24 +163,29 @@ class _MainPhoneScreenState extends State<MainPhoneScreen> {
 
               const SizedBox(height: 20),
 
-              DeviceCard(
-                deviceName: "Tracked Phone",
-                battery: trackedDevice?.battery ?? 0,
-                online: trackedDevice?.sharing ?? false,
-                onTap: () {
-                  if (trackedDevice == null) return;
-
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => MapScreen(
-                        latitude: trackedDevice!.latitude,
-                        longitude: trackedDevice!.longitude,
-                      ),
-                    ),
-                  );
-                },
+        Column(
+  children: trackeddevices.map((device) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15),
+      child: DeviceCard(
+        deviceName: device.deviceId,
+        battery: device.battery,
+        online: device.sharing,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => MapScreen(
+                latitude: device.latitude,
+                longitude: device.longitude,
               ),
+            ),
+          );
+        },
+      ),
+    );
+  }).toList(),
+),
 
               const SizedBox(height: 30),
             ],
