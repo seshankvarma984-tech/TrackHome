@@ -12,7 +12,7 @@ class FirebaseService {
     required bool sharing,
   }) async {
     await _firestore
-        .collection("users")
+        .collection("tracked_devices")
         .doc(deviceId)
         .set({
       "latitude": latitude,
@@ -26,7 +26,7 @@ class FirebaseService {
     String deviceId,
   ) {
     return _firestore
-        .collection("users")
+        .collection("tracked_devices")
         .doc(deviceId)
         .snapshots()
         .map((snapshot) {
