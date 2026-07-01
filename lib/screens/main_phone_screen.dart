@@ -1,4 +1,5 @@
 import '../services/firebase_service.dart';
+import '../widgets/device_card.dart';
 import 'package:flutter/material.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -183,22 +184,34 @@ class _MainPhoneScreenState extends State<MainPhoneScreen> {
 
 const SizedBox(height: 25),
 
-InfoCard(
-  icon: Icons.gps_fixed,
-  title: "GPS",
-  subtitle: "High Accuracy",
+const Text(
+  "Connected Devices",
+  style: TextStyle(
+    color: Colors.white,
+    fontSize: 22,
+    fontWeight: FontWeight.bold,
+  ),
 ),
 
-InfoCard(
-  icon: Icons.security,
-  title: "Geofence",
-  subtitle: "Ready",
-),
+const SizedBox(height: 20),
 
-InfoCard(
-  icon: Icons.battery_full,
-  title: "Battery",
-  subtitle: "${trackedDevice?.battery ?? 0}%",
+DeviceCard(
+  deviceName: "Tracked Phone",
+  battery: trackedDevice?.battery ?? 0,
+  online: trackedDevice?.sharing ?? false,
+  onTap: () {
+    if (trackedDevice == null) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MapScreen(
+          latitude: trackedDevice!.latitude,
+          longitude: trackedDevice!.longitude,
+        ),
+      ),
+    );
+  },
 ),
 
 const SizedBox(height: 30),
