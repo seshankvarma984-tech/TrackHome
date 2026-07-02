@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:battery_plus/battery_plus.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/location_service.dart';
 import '../services/firebase_service.dart';
 import '../widgets/info_card.dart';
@@ -27,16 +27,54 @@ final FirebaseService _firebaseService = FirebaseService();
   Timer? uploadTimer;
 
   @override
-  void initState() {
-    super.initState();
-    loadBattery();
-  }
+void initState() {
+  super.initState();
+  loadBattery();
+  loadSharingState();
+}
 
   Future<void> loadBattery() async {
     batteryLevel = await _battery.batteryLevel;
 
     setState(() {});
   }
+  Future<void> saveSharingState(bool value) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool("sharing_enabled", value);
+}
+
+Future<void> loadSharingState() async {
+  final prefs = await SharedPreferences.getInstance();
+
+  isSharing = prefs.getBool("sharing_enabled") ?? false;
+
+  setState(() {});
+
+  if (isSharing) {
+    startTracking();
+  }
+}
+void startTracking() {
+  uploadTimer?.cancel();
+
+  uploadTimer = Timer.periodic(
+    const Duration(seconds: 5),
+    (_) async {
+      final position =
+          await _locationService.getCurrentLocation();
+
+      if (position == null) return;
+
+      await _firebaseService.uploadDeviceData(
+        deviceId: "tracked_phone_001",
+        latitude: position.latitude,
+        longitude: position.longitude,
+        battery: batteryLevel,
+        sharing: true,
+      );
+    },
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -187,29 +225,11 @@ SizedBox(
   setState(() {
     isSharing = !isSharing;
   });
+  await saveSharingState(isSharing);
 
   if (isSharing) {
 
-  uploadTimer = Timer.periodic(
-    const Duration(seconds: 5),
-    (_) async {
-
-      final position =
-          await _locationService.getCurrentLocation();
-
-      if (position == null) return;
-
-      await _firebaseService.uploadDeviceData(
-        deviceId: "tracked_phone_001",
-        latitude: position.latitude,
-        longitude: position.longitude,
-        battery: batteryLevel,
-        sharing: true,
-      );
-
-    },
-  );
-
+ startTracking();
 } else {
 
   uploadTimer?.cancel();
