@@ -48,5 +48,16 @@ class FirebaseService {
       );
     }).toList();
   });
+}Future<void> pairDevice({
+  required String parentId,
+  required String deviceId,
+}) async {
+  await _firestore
+      .collection("paired_devices")
+      .doc(parentId)
+      .set({
+    "devices": FieldValue.arrayUnion([deviceId]),
+  }, SetOptions(merge: true));
 }
+
   }

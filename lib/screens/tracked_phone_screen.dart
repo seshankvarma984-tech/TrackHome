@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:battery_plus/battery_plus.dart';
+import '../utils/device_id_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/location_service.dart';
 import '../services/firebase_service.dart';
@@ -20,6 +21,9 @@ class _TrackedPhoneScreenState
   final Battery _battery = Battery();
   final LocationService _locationService = LocationService();
 final FirebaseService _firebaseService = FirebaseService();
+final DeviceIdService _deviceIdService = DeviceIdService();
+
+String deviceId = "";
 
   int batteryLevel = 0;
 
@@ -30,6 +34,7 @@ final FirebaseService _firebaseService = FirebaseService();
 void initState() {
   super.initState();
   loadBattery();
+  loadDeviceId();
   loadSharingState();
 }
 
@@ -38,6 +43,11 @@ void initState() {
 
     setState(() {});
   }
+  Future<void> loadDeviceId() async {
+  deviceId = await _deviceIdService.getDeviceId();
+
+  setState(() {});
+}
   Future<void> saveSharingState(bool value) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setBool("sharing_enabled", value);
@@ -66,7 +76,7 @@ void startTracking() {
       if (position == null) return;
 
       await _firebaseService.uploadDeviceData(
-        deviceId: "tracked_phone_001",
+        deviceId: deviceId,
         latitude: position.latitude,
         longitude: position.longitude,
         battery: batteryLevel,
@@ -173,16 +183,35 @@ void startTracking() {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+const Text(
+  "Tracked Phone",
+  style: TextStyle(
+    color: Colors.white,
+    fontSize: 20,
+    fontWeight: FontWeight.bold,
+  ),
+),
 
-                const SizedBox(height: 4),
+const SizedBox(height: 4),
 
-                Text(
-                  "Battery : $batteryLevel %",
-                  style: const TextStyle(
-                    color: Colors.white70,
-                  ),
-                ),
-              ],
+Text(
+  deviceId.isEmpty
+      ? "Generating ID..."
+      : deviceId,
+  style: const TextStyle(
+    color: Colors.white70,
+    fontSize: 13,
+  ),
+),
+
+const SizedBox(height: 4),
+
+Text(
+  "Battery : $batteryLevel %",
+  style: const TextStyle(
+    color: Colors.white70,
+  ),
+),              ],
             ),
           ),
         ],
@@ -255,6 +284,42 @@ SizedBox(
           : "START SHARING",
 
       style: const TextStyle(
+        color: Colors.white,
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+  ),
+),
+
+const SizedBox(height: 20),
+SizedBox(
+  width: double.infinity,
+  height: 58,
+  child: ElevatedButton(
+    onPressed: () async {
+      await _firebaseService.pairDevice(
+        parentId: "test_parent",
+        deviceId: deviceId,
+      );
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Device paired successfully!"),
+          ),
+        );
+      }
+    },
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Colors.blue,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+      ),
+    ),
+    child: const Text(
+      "PAIR WITH PARENT",
+      style: TextStyle(
         color: Colors.white,
         fontSize: 18,
         fontWeight: FontWeight.bold,
