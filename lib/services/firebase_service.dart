@@ -59,5 +59,31 @@ class FirebaseService {
     "devices": FieldValue.arrayUnion([deviceId]),
   }, SetOptions(merge: true));
 }
+Stream<List<String>> getPairedDeviceIds(String parentId) {
+  return _firestore
+      .collection("paired_devices")
+      .doc(parentId)
+      .snapshots()
+      .map((snapshot) {
+
+    if (!snapshot.exists) {
+      return <String>[];
+    }
+
+    final data = snapshot.data();
+
+    if (data == null) {
+      return <String>[];
+    }
+
+    final devices = data["devices"] as List<dynamic>?;
+
+    if (devices == null) {
+      return <String>[];
+    }
+
+    return devices.cast<String>();
+  });
+}
 
   }

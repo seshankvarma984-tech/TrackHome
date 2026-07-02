@@ -19,8 +19,9 @@ class _MainPhoneScreenState extends State<MainPhoneScreen> {
 
  List<DeviceModel> trackeddevices = [];
  DeviceModel? get firstDevice =>
-    trackeddevices.isNotEmpty ? trackeddevices.first : null;
-
+    trackeddevices.isNotEmpty
+        ? trackeddevices.first
+        : null;
   @override
   void initState() {
     super.initState();
